@@ -1,6 +1,6 @@
 # AI Note Taker
 
-![Notespro logo](dist/assets/notespro.ico)
+![Notespro logo](store/notespro.ico)
 
 ## Run Locally
 
