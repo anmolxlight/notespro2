@@ -21,9 +21,27 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 // Keep Redux auth state in sync with Supabase session
-supabase.auth.getSession().then(({ data }) => {
-  store.dispatch(setUserFromSession(data.session ?? null));
-});
+const bootstrapAuthFromUrl = async () => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      const params = new URLSearchParams(window.location.hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        await supabase.auth.setSession({ access_token, refresh_token });
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      }
+    }
+  } catch {
+    // ignore and proceed
+  } finally {
+    const { data } = await supabase.auth.getSession();
+    store.dispatch(setUserFromSession(data.session ?? null));
+  }
+};
+
+void bootstrapAuthFromUrl();
 
 supabase.auth.onAuthStateChange((_event, session) => {
   store.dispatch(setUserFromSession(session ?? null));
