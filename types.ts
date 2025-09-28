@@ -6,4 +6,5 @@ export interface Note {
   created_at: string;
   labels: string[];
   color: string;
+  user_id?: string | null;
 }

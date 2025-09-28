@@ -5,6 +5,7 @@ import { toggleTheme } from '../features/theme/themeSlice';
 import { SunIcon, MoonIcon, SparklesIcon, SearchIcon } from '../icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { setSearchQuery } from '../features/filter/filterSlice';
+import { selectAuthUser, signInWithGoogle, signOut, selectAuthStatus } from '../features/auth/authSlice';
 
 const SearchBar: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -28,6 +29,8 @@ const SearchBar: React.FC = () => {
 export const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const theme = useAppSelector((state) => state.theme.mode);
+  const user = useAppSelector(selectAuthUser);
+  const authStatus = useAppSelector(selectAuthStatus);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm">
@@ -39,23 +42,51 @@ export const Header: React.FC = () => {
         <div className="flex-1 flex justify-center px-4">
           <SearchBar />
         </div>
-        <motion.button
-          onClick={() => dispatch(toggleTheme())}
-          className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          whileTap={{ scale: 0.9, rotate: 30 }}
-        >
-          <AnimatePresence initial={false} mode="wait">
-            <motion.div
-              key={theme}
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+        <div className="flex items-center gap-2">
+          <motion.button
+            onClick={() => dispatch(toggleTheme())}
+            className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+            whileTap={{ scale: 0.9, rotate: 30 }}
+          >
+            <AnimatePresence initial={false} mode="wait">
+              <motion.div
+                key={theme}
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.button>
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt="avatar" className="h-8 w-8 rounded-full" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-zinc-300 dark:bg-zinc-700 flex items-center justify-center text-xs">
+                  {user.email?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => dispatch(signOut())}
+                className="px-3 py-1 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 text-sm hover:opacity-90"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => dispatch(signInWithGoogle())}
+              disabled={authStatus === 'loading'}
+              className="px-3 py-1 rounded-full bg-yellow-500 text-zinc-900 text-sm hover:bg-yellow-400 disabled:opacity-50"
             >
-              {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-            </motion.div>
-          </AnimatePresence>
-        </motion.button>
+              {authStatus === 'loading' ? 'Signing in...' : 'Sign in with Google'}
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

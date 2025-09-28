@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Note } from '../../types';
 import type { RootState } from '../../store/store';
+import { store } from '../../store/store';
 import { supabase } from '../../services/supabaseClient';
 
 const parseLabels = (content: string): string[] => {
@@ -24,9 +25,14 @@ const initialState: NotesState = {
 };
 
 export const fetchNotes = createAsyncThunk('notes/fetchNotes', async () => {
+    const authState = store.getState().auth;
+    if (!authState.user) {
+        return [] as Note[];
+    }
     const { data, error } = await supabase
         .from('notes')
         .select('*')
+        .eq('user_id', authState.user.id)
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -39,7 +45,12 @@ export const addNewNote = createAsyncThunk(
     'notes/addNewNote',
     async (initialNote: { title: string; content: string }) => {
         const labels = parseLabels(initialNote.content);
-        const newNote = { ...initialNote, labels, color: 'default' };
+        const authState = store.getState().auth;
+        const userId = authState.user?.id ?? null;
+        if (!userId) {
+            throw new Error('Please sign in to create notes');
+        }
+        const newNote = { ...initialNote, labels, color: 'default', user_id: userId };
 
         const { data, error } = await supabase
             .from('notes')
@@ -49,7 +60,10 @@ export const addNewNote = createAsyncThunk(
         if (error) {
             throw new Error(error.message);
         }
-        return data![0] as Note;
+        if (!data || data.length === 0) {
+            throw new Error('Insert did not return the created note');
+        }
+        return data[0] as Note;
     }
 );
 
@@ -75,7 +89,10 @@ export const updateExistingNote = createAsyncThunk(
         if (error) {
             throw new Error(error.message);
         }
-        return data![0] as Note;
+        if (!data || data.length === 0) {
+            throw new Error('Update did not return the updated note');
+        }
+        return data[0] as Note;
     }
 );
 

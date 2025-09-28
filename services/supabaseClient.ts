@@ -1,10 +1,20 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://pezsekqgdlrayicrbrfl.supabase.co'; 
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlenNla3FnZGxyYXlpY3JicmZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMzQ1MDMsImV4cCI6MjA2MzYxMDUwM30.I6bCEVCe19_GwnKvBof1kMuL9BGNHqyUdoTLPBck7Ko';
+// Use Vite's static env replacement to ensure values are injected at build/serve time
+const { VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY } = import.meta.env;
+const supabaseUrl = VITE_SUPABASE_URL;
+const supabaseAnonKey = VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+if (!supabaseUrl || !supabaseAnonKey) {
+  // Provide a clear runtime error to guide setup
+  // eslint-disable-next-line no-console
+  console.error(
+    "Missing Supabase environment variables. Please set 'VITE_SUPABASE_URL' and 'VITE_SUPABASE_ANON_KEY' in your .env file."
+  );
+}
+
+export const supabase = createClient(supabaseUrl as string, supabaseAnonKey as string);
 
 /*
   Supabase table schema for this project.
