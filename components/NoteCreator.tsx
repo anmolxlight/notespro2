@@ -11,29 +11,40 @@ export const NoteCreator: React.FC = () => {
   const [content, setContent] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleFocus = () => setIsFocused(true);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (content.trim() || title.trim()) {
-      dispatch(addNewNote({ title, content }));
-      setTitle('');
-      setContent('');
-      setIsFocused(false);
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
+      try {
+        setError(null);
+        await dispatch(addNewNote({ title, content })).unwrap();
+        setTitle('');
+        setContent('');
+        setIsFocused(false);
+        if (textareaRef.current) {
+          textareaRef.current.style.height = 'auto';
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to save note');
       }
     }
   };
   
-  const handleOutsideClick = (event: MouseEvent) => {
+  const handleOutsideClick = async (event: MouseEvent) => {
     if (formRef.current && !formRef.current.contains(event.target as Node)) {
       if (content.trim() || title.trim()) {
-        dispatch(addNewNote({ title, content }));
+        try {
+          setError(null);
+          await dispatch(addNewNote({ title, content })).unwrap();
+        } catch (err: any) {
+          setError(err?.message || 'Failed to save note');
+        }
       }
       setTitle('');
       setContent('');
@@ -89,6 +100,9 @@ export const NoteCreator: React.FC = () => {
         onSubmit={handleSubmit}
         className="w-full bg-white dark:bg-zinc-900 shadow-lg rounded-lg p-4 transition-all duration-300"
       >
+        {error && (
+          <div className="mb-2 text-sm text-red-600 dark:text-red-400">{error}</div>
+        )}
         <motion.input
           animate={{ height: isFocused ? 'auto' : 0, opacity: isFocused ? 1 : 0, marginBottom: isFocused ? '0.5rem' : 0 }}
           transition={{ duration: 0.2 }}
