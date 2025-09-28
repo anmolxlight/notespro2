@@ -6,6 +6,7 @@ import filterReducer from '../features/filter/filterSlice';
 import modalReducer from '../features/modal/modalSlice';
 import authReducer, { setUserFromSession } from '../features/auth/authSlice';
 import { supabase } from '../services/supabaseClient';
+import { fetchNotes } from '../features/notes/notesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +39,9 @@ const bootstrapAuthFromUrl = async () => {
   } finally {
     const { data } = await supabase.auth.getSession();
     store.dispatch(setUserFromSession(data.session ?? null));
+    if (data.session?.user) {
+      store.dispatch(fetchNotes());
+    }
   }
 };
 
@@ -45,4 +49,7 @@ void bootstrapAuthFromUrl();
 
 supabase.auth.onAuthStateChange((_event, session) => {
   store.dispatch(setUserFromSession(session ?? null));
+  if (session?.user) {
+    store.dispatch(fetchNotes());
+  }
 });

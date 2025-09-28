@@ -3,7 +3,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Note } from '../../types';
 import type { RootState } from '../../store/store';
-import { store } from '../../store/store';
 import { supabase } from '../../services/supabaseClient';
 
 const parseLabels = (content: string): string[] => {
@@ -24,29 +23,33 @@ const initialState: NotesState = {
   error: null,
 };
 
-export const fetchNotes = createAsyncThunk('notes/fetchNotes', async () => {
-    const authState = store.getState().auth;
-    if (!authState.user) {
-        return [] as Note[];
-    }
-    const { data, error } = await supabase
-        .from('notes')
-        .select('*')
-        .eq('user_id', authState.user.id)
-        .order('created_at', { ascending: false });
+export const fetchNotes = createAsyncThunk(
+    'notes/fetchNotes',
+    async (_: void, { getState }) => {
+        const state = getState() as RootState;
+        const user = state.auth.user;
+        if (!user) {
+            return [] as Note[];
+        }
+        const { data, error } = await supabase
+            .from('notes')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
 
-    if (error) {
-        throw new Error(error.message);
+        if (error) {
+            throw new Error(error.message);
+        }
+        return data as Note[];
     }
-    return data as Note[];
-});
+);
 
 export const addNewNote = createAsyncThunk(
     'notes/addNewNote',
-    async (initialNote: { title: string; content: string }) => {
+    async (initialNote: { title: string; content: string }, { getState }) => {
         const labels = parseLabels(initialNote.content);
-        const authState = store.getState().auth;
-        const userId = authState.user?.id ?? null;
+        const state = getState() as RootState;
+        const userId = state.auth.user?.id ?? null;
         if (!userId) {
             throw new Error('Please sign in to create notes');
         }

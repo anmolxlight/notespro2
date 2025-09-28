@@ -24,10 +24,10 @@ function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (notesStatus === 'idle') {
+    if (user) {
       dispatch(fetchNotes());
     }
-  }, [notesStatus, dispatch]);
+  }, [user?.id, dispatch]);
 
   if (!user) {
     return <AuthLanding />;
