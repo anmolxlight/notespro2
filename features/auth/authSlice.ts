@@ -38,6 +38,19 @@ export const signInWithGoogle = createAsyncThunk('auth/signInWithGoogle', async 
   return data.url || null;
 });
 
+export const signInWithGithub = createAsyncThunk('auth/signInWithGithub', async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: {
+      redirectTo: window.location.origin,
+    },
+  });
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data.url || null;
+});
+
 export const signOut = createAsyncThunk('auth/signOut', async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
@@ -86,6 +99,17 @@ export const authSlice = createSlice({
         state.status = 'idle';
       })
       .addCase(signInWithGoogle.rejected, (state, action) => {
+        state.status = 'error';
+        state.error = action.error.message || 'Failed to sign in';
+      })
+      .addCase(signInWithGithub.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(signInWithGithub.fulfilled, (state) => {
+        state.status = 'idle';
+      })
+      .addCase(signInWithGithub.rejected, (state, action) => {
         state.status = 'error';
         state.error = action.error.message || 'Failed to sign in';
       })
