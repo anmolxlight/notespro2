@@ -127,8 +127,11 @@ export const notesSlice = createSlice({
         })
         .addCase(fetchNotes.rejected, (state, action) => {
             state.status = 'failed';
-            if (action.error.message?.includes("Could not find the table")) {
-                state.error = "Database setup needed: The 'notes' table is missing.\n\nPlease run the SQL script found in the comments of services/supabaseClient.ts in your Supabase project's SQL Editor to create it.";
+            const message = action.error.message || '';
+            if (message.includes("Could not find the table")) {
+                state.error = "Database setup needed: The 'notes' table is missing.\n\nPlease run the SQL script comment in services/supabaseClient.ts to create it.";
+            } else if (message.includes("Could not find the 'user_id' column")) {
+                state.error = "Database setup needed: The 'user_id' column is missing on 'notes'.\n\nOpen services/supabaseClient.ts and run the SQL in the comment to add user_id and RLS policies.";
             } else {
                 state.error = action.error.message || 'Failed to fetch notes';
             }

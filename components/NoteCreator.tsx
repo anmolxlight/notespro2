@@ -95,6 +95,7 @@ export const NoteCreator: React.FC = () => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onFocus={handleFocus}
           placeholder="Title"
           className="w-full bg-transparent text-lg font-medium focus:outline-none overflow-hidden"
           disabled={isGenerating}
