@@ -1,3 +1,9 @@
+# AI Note Taker
+
+# AI Note Taker
+
+![AI Note Taker Screenshot](dist/assets/ideogram-v3-quality_make_a_minimalistic_.png)
+
 ## Run Locally
 
 **Prerequisites:**  Node.js
@@ -15,6 +21,60 @@
    Or copy from `.env.example`.
 3. Run the app:
    `npm run dev`
+
+## Features
+
+- **Secure authentication**: Google and GitHub OAuth via Supabase
+- **Smart labels**: `#hashtags` in content become labels automatically
+- **Filter and search**: Real-time search and label-based filtering
+- **AI assistance (Gemini)**:
+  - Generate initial note content in the creator
+  - Inline per-note prompts to append AI-generated text
+  - One-click actions to **Summarize** or **Improve writing** in the editor modal
+  - Floating “Ask About Your Notes” chat that answers questions using your notes (RAG-style)
+- **Color-coded notes**: Choose colors; selections persist
+- **Responsive grid with animations**: Smooth interactions using Framer Motion
+
+## Tech Stack
+
+- **React** 19 + **TypeScript**
+- **Redux Toolkit** 2 + **React-Redux** 9
+- **Vite** 6 (dev/build)
+- **Framer Motion** (animations)
+- **Tailwind CSS** via CDN + Google Fonts (Poppins)
+- **Supabase JS** v2 (database + OAuth)
+- **Google Gemini** via `@google/genai`
+
+## Project Structure
+
+```
+components/        UI components (Header, NoteCreator, NotesGrid, NoteModal, Sidebar, RagChat, NoteCard)
+features/          Redux slices (auth, notes, filter, modal, theme)
+services/          Supabase client and Gemini service
+store/             Redux store wiring
+lib/               Utilities and color helpers
+index.tsx          App bootstrap
+App.tsx            App layout and feature wiring
+```
+
+## Environment Variables
+
+Create `.env.local` (or copy `.env.example`) with:
+
+```
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+GEMINI_API_KEY=your_google_gemini_key
+```
+
+Notes:
+- The app uses `window.location.origin` for OAuth `redirectTo`.
+- Keep your keys private; don’t commit `.env*` files.
+
+## OAuth Setup (Supabase)
+
+- Enable **Google** and optionally **GitHub** providers in Authentication > Providers
+- Set the redirect URL to your app origin (e.g., `http://localhost:3000`)
 
 ## Supabase Database Setup
 
@@ -47,3 +107,15 @@ create policy "Users can delete own notes" on public.notes
 ```
 
 Enable Google OAuth in Supabase Authentication > Providers and set the redirect to your app origin (e.g., `http://localhost:3000`). The app uses `window.location.origin` for `redirectTo`.
+
+## NPM Scripts
+
+- `npm run dev`: Start Vite dev server
+- `npm run build`: Production build
+- `npm run preview`: Preview production build
+
+## Troubleshooting
+
+- **“Database setup needed” errors in UI**: Run the SQL in this README (or the comment in `services/supabaseClient.ts`). Ensure `user_id` exists and RLS policies are applied.
+- **Auth seems stuck after clicking sign-in**: Verify provider settings and redirect URL in Supabase match your app origin.
+- **No notes shown after sign-in**: Confirm you’re authenticated and the `notes` table exists with correct policies.
