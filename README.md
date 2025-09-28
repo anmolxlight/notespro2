@@ -1,8 +1,6 @@
 # AI Note Taker
 
-# AI Note Taker
-
-![AI Note Taker Screenshot](dist/assets/ideogram-v3-quality_make_a_minimalistic_.png)
+![AI Note Taker Screenshot](dist/assets/notespro.ico)
 
 ## Run Locally
 
