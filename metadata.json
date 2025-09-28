@@ -1,0 +1,5 @@
+{
+  "name": "NotesPro",
+  "description": "A Google Keep clone enhanced with Gemini-powered AI features. Users can create, manage, and query their notes using Retrieval-Augmented Generation (RAG) and generate content within individual notes.",
+  "requestFramePermissions": []
+}
