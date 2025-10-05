@@ -53,7 +53,7 @@ export const NoteModal: React.FC = () => {
     }, [content]);
     
     const handleSaveChanges = () => {
-        if (note && initialNoteState.current && (title !== initialNoteState.current.title || content !== initialNoteState.current.content)) {
+        if (note && initialNoteState.current && (title !== initialNoteState.current.title || content !== initialNoteState.current.content || color !== initialNoteState.current.color)) {
             dispatch(updateExistingNote({ ...note, title, content, color }));
         }
     }
@@ -130,12 +130,6 @@ export const NoteModal: React.FC = () => {
     const handleColorChange = (newColor: NoteColor) => {
         if (!note) return;
         setColor(newColor);
-        // Dispatch update immediately for real-time feel
-        dispatch(updateExistingNote({ ...note, title, content, color: newColor }));
-        // Update the initial state ref so we don't re-save on close unless other changes are made
-        if (initialNoteState.current) {
-            initialNoteState.current.color = newColor;
-        }
     };
 
     if (!selectedNoteId || !note) {
